@@ -37,21 +37,30 @@ func main() {
 		log.Println("Anthropic client initialized")
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-	getUserMessage := func() (string, bool) {
-		if !scanner.Scan() {
-			return "", false
-		}
-		return scanner.Text(), true
-	}
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	// Unblock Scanner.Scan when Ctrl-C cancels an idle chat prompt.
+	// Read input separately so an idle prompt can select on cancellation.
+	scanner := bufio.NewScanner(os.Stdin)
+	messages := make(chan string)
 	go func() {
-		<-ctx.Done()
-		os.Stdin.Close()
+		defer close(messages)
+		for scanner.Scan() {
+			select {
+			case messages <- scanner.Text():
+			case <-ctx.Done():
+				return
+			}
+		}
 	}()
+	getUserMessage := func() (string, bool) {
+		select {
+		case <-ctx.Done():
+			return "", false
+		case text, ok := <-messages:
+			return text, ok
+		}
+	}
+
 	session, tools, err := connectParallel(ctx, parallelEndpoint, &http.Client{Transport: projectTransport{http.DefaultTransport}})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Connect to Parallel:", err)
