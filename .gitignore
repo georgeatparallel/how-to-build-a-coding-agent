@@ -16,6 +16,7 @@ edit_tool
 list_files
 read
 read_verbose
+parallel_search
 
 # demo files
 fizzbuzz.js

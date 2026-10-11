@@ -225,6 +225,37 @@ go run code_search_tool.go
 
 ---
 
+## Optional: Web Search with MCP
+
+`parallel_search.go` shows how to connect the workshop's tool registry to a remote
+[Model Context Protocol](https://modelcontextprotocol.io/) server. It discovers
+`web_search` and `web_fetch` from [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp)
+and dispatches them through the same Claude tool loop.
+
+```bash
+go mod download
+# Keep ANTHROPIC_API_KEY set as above.
+go run parallel_search.go
+```
+
+Try: "Search for Go's context cancellation documentation and include source links."
+Or: "Fetch https://go.dev/blog/context and explain cancellation."
+
+The example uses `https://search.parallel.ai/mcp` over Streamable HTTP. Parallel's
+anonymous tier provides free search in Fast mode and page fetching without a
+Parallel account or API key, with rate limits for light use. Claude still requires
+your Anthropic API key. The six existing workshop examples work as before.
+MCP errors are returned to Claude as tool errors; each MCP operation has a
+60-second timeout, and Ctrl-C cancels outstanding requests.
+
+Run this example's tests separately, like the workshop's standalone programs:
+
+```bash
+go test parallel_search.go parallel_search_test.go
+```
+
+---
+
 ## 🧪 Sample Files (Already Included)
 
 1. `fizzbuzz.js`: for file reading and editing

@@ -1,7 +1,7 @@
 .PHONY: build fmt check clean all
 
 # Go binaries to build
-BINARIES := bash_tool chat edit_tool list_files read
+BINARIES := bash_tool chat edit_tool list_files read parallel_search
 
 # Build all binaries
 build:
@@ -11,6 +11,7 @@ build:
 	go build -o edit_tool edit_tool.go
 	go build -o list_files list_files.go
 	go build -o read read.go
+	go build -o parallel_search parallel_search.go
 
 # Format all Go files
 fmt:
@@ -25,6 +26,7 @@ check:
 	go vet edit_tool.go
 	go vet list_files.go
 	go vet read.go
+	go vet parallel_search.go
 	@echo "Running go mod tidy..."
 	go mod tidy
 
