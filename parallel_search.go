@@ -47,6 +47,11 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+	// Unblock Scanner.Scan when Ctrl-C cancels an idle chat prompt.
+	go func() {
+		<-ctx.Done()
+		os.Stdin.Close()
+	}()
 	session, tools, err := connectParallel(ctx, parallelEndpoint, &http.Client{Transport: projectTransport{http.DefaultTransport}})
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Connect to Parallel:", err)
